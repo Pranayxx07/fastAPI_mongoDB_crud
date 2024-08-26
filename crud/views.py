@@ -61,13 +61,11 @@ async def update_movie(id: str, movie: Movie):
     raise HTTPException(status_code=404, detail="Movie not found")
 
 
-@routs.delete("/delete_movies/{id}", response_model=Movie)
+@routs.delete("/delete_movies/{id}")
 async def delete_movie(id: str):
     delete_result = await movie_collection.delete_one({"_id": ObjectId(id)})
-
-    if delete_result.deleted_count == 1:
-        return {"message": "Movie deleted"}
-
-    raise HTTPException(status_code=404, detail="Movie not found")
+    if delete_result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return {"status": "Movie deleted"}
 
 

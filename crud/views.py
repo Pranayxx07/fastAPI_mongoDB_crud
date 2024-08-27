@@ -87,6 +87,13 @@ async def update_movie(id: str,movie_name,movie_summary,img: UploadFile = None):
             if not is_allowed_file(img.filename):
                 raise HTTPException(status_code=400, detail="Invalid file format. Only JPG and PNG are allowed.")
             
+            existing_movie = await movie_collection.find_one({"_id": ObjectId(id)})
+            img_path = existing_movie.get('img')
+
+            #removing prvious file from system 
+            
+            if img_path and os.path.exists(img_path):
+                os.remove(img_path)
             img_filename = f"{ObjectId()}.{img.filename.rsplit('.', 1)[1].lower()}"
             img_path = os.path.join("uploads", img_filename)
             await save_image(img, img_path)
@@ -101,7 +108,6 @@ async def update_movie(id: str,movie_name,movie_summary,img: UploadFile = None):
                 logger.info(f"Updated movie with ID: {id}")
                 return movie_helper(updated_movie)
 
-        existing_movie = await movie_collection.find_one({"_id": ObjectId(id)})
         if existing_movie:
             logger.info(f"No changes made to the movie with ID: {id}")
             return movie_helper(existing_movie)
